@@ -9,7 +9,7 @@ import './App.css';
 
 
 function onSceneReady(scene) {
-  const canvas = scene.getEngine().getRenderingCanvas();
+  var canvas = scene.getEngine().getRenderingCanvas();
 
   var camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2,
     Math.PI / 2.5, 15, new BABYLON.Vector3(0, 0, 0), scene);
@@ -96,7 +96,7 @@ function onSceneReady(scene) {
       outline.push(new BABYLON.Vector3(0.2 * Math.cos(i * Math.PI / 40), 0, 0.2 * Math.sin(i * Math.PI / 40) - 0.1));
     }
 
-    //top
+    //Top
     outline.push(new BABYLON.Vector3(0, 0, 0.1));
     outline.push(new BABYLON.Vector3(-0.3, 0, 0.1));
 
@@ -120,7 +120,7 @@ function onSceneReady(scene) {
     wheelUV[1] = new BABYLON.Vector4(0, 0.5, 0, 0.5);
     wheelUV[2] = new BABYLON.Vector4(0, 0, 1, 1);
 
-    //wheel material
+    //Wheel material
     var wheelMat = new BABYLON.StandardMaterial("wheelMat");
     wheelMat.diffuseTexture = new BABYLON.Texture("objects/wheel.png");
 
@@ -140,13 +140,53 @@ function onSceneReady(scene) {
     var wheelLF = wheelRF.clone("wheelLF");
     wheelLF.position.y = -0.2 - 0.035;
 
-    //animate wheel
-    var animWheel = new BABYLON.Animation("wheelAnim", "rotation.y", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+    //Animate wheel
+    var animWheel = new BABYLON.Animation("wheelAnimation", "rotation.y", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+    var wheelKeys = [];
+
+    //Animation key
+
+    //Frame 0 = rotation 0
+    wheelKeys.push({
+      frame: 0,
+      value: 0
+    });
+
+    //Animation key 30 (1 sec @ 30fps) = rotation is 2PI (360)
+    wheelKeys.push({
+      frame: 30,
+      value: 2 * Math.PI
+    })
 
 
+    //Set keys
+    animWheel.setKeys(wheelKeys);
+
+    wheelRB.animations = [];
+    wheelRB.animations.push(animWheel);
+
+    wheelRF.animations = [];
+    wheelRF.animations.push(animWheel);
+
+    wheelLB.animations = [];
+    wheelLB.animations.push(animWheel);
+
+    wheelLF.animations = [];
+    wheelLF.animations.push(animWheel);
+
+
+
+
+    scene.beginAnimation(wheelRB, 0, 30, true);
+    scene.beginAnimation(wheelRF, 0, 30, true);
+    scene.beginAnimation(wheelLB, 0, 30, true);
+    scene.beginAnimation(wheelLF, 0, 30, true);
 
     return car;
   };
+
+  return scene
 };
 
 
