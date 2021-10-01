@@ -1,6 +1,7 @@
 
 import * as BABYLON from '@babylonjs/core';
 import { BoxParticleEmitter, SceneLoaderAnimationGroupLoadingMode } from '@babylonjs/core';
+import { defaultUboDeclaration } from '@babylonjs/core/Shaders/ShadersInclude/defaultUboDeclaration';
 import SceneComponent from 'babylonjs-hook';
 import * as earcut from 'earcut';
 import './App.css';
@@ -12,13 +13,21 @@ function onSceneReady(scene) {
   var canvas = scene.getEngine().getRenderingCanvas();
 
   var camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2,
-    Math.PI / 2.5, 15, new BABYLON.Vector3(0, 0, 0), scene);
+    Math.PI / 2.5, 10, new BABYLON.Vector3(0, 0, 0), scene);
+  camera.upperBetaLimit = Math.PI / 2.1;
   camera.attachControl(canvas, true);
 
   var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
   light.intensity = 0.7;
 
-
+  var skybox = BABYLON.MeshBuilder.CreateBox("skybox", { size: 150 }, scene);
+  var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+  skyboxMaterial.backFaceCulling = false;
+  skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("objects/skybox/skybox", scene);
+  skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+  skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+  skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+  skybox.material = skyboxMaterial;
 
   var music = new BABYLON.Sound("music", "objects/music.wav", scene, null, {
     loop: true,
@@ -28,10 +37,24 @@ function onSceneReady(scene) {
   music.play();
 
   var ground = createGround();
-  createHouse().rotation.y = 10;
-  createHouse().position.z = 3;
 
-  createCar().position = new BABYLON.Vector3(1, 1, 1);
+  var house = createHouse();
+  house.position.z = -3;
+
+  var houses = [];
+
+  houses[0] = house.createInstance("house")
+  houses[0].rotation.y = 10;
+  houses[0].position.x = -2
+  createHouse().position = new BABYLON.Vector3(1, 0, 3);
+
+  var car = createCar();
+  car.rotation = new BABYLON.Vector3(-Math.PI / 2, 0, 0);
+  car.position.y = 0.16;
+  car.position.x = 1;
+  car.position.z = 1;
+
+  var dude = myDude();
 
 
   //create functions
@@ -64,7 +87,11 @@ function onSceneReady(scene) {
 
 
   function createRoof() {
-    var roof = BABYLON.MeshBuilder.CreateCylinder("root", { diameter: 1.3, height: 1.2, tessellation: 3 });
+    var roof = BABYLON.MeshBuilder.CreateCylinder("root", {
+      diameter: 1.3,
+      height: 1.2,
+      tessellation: 3
+    });
     roof.scaling.x = 0.75;
     roof.rotation.z = Math.PI / 2;
     roof.position.y = 1.22;
@@ -78,8 +105,15 @@ function onSceneReady(scene) {
 
 
   function createGround() {
-    var ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 10, height: 10 });
+    var ground = BABYLON.MeshBuilder.CreateGroundFromHeightMap("ground", "https://assets.babylonjs.com/environments/villageheightmap.png", {
+      width: 120,
+      height: 120,
+      subdivisions: 20,
+      minHeight: 0,
+      maxHeight: 10
+    });
     var groundMat = new BABYLON.StandardMaterial("groundMat");
+    groundMat.diffuseTexture = new BABYLON.Texture("https://assets.babylonjs.com/environments/valleygrass.png");
 
     groundMat.diffuseColor = new BABYLON.Color3(0, 1, 0);
     ground.material = groundMat;
@@ -109,7 +143,14 @@ function onSceneReady(scene) {
     carMat.diffuseTexture = new BABYLON.Texture("objects/car.png");
 
 
-    var car = BABYLON.MeshBuilder.ExtrudePolygon("car", { shape: outline, depth: 0.2, faceUV: faceUV, wrap: true }, scene, earcut);
+    var car = BABYLON.MeshBuilder.ExtrudePolygon("car",
+      {
+        shape: outline,
+        depth: 0.2,
+        faceUV: faceUV,
+        wrap: true
+      },
+      scene, earcut);
     car.material = carMat;
 
 
@@ -124,7 +165,12 @@ function onSceneReady(scene) {
     var wheelMat = new BABYLON.StandardMaterial("wheelMat");
     wheelMat.diffuseTexture = new BABYLON.Texture("objects/wheel.png");
 
-    const wheelRB = BABYLON.MeshBuilder.CreateCylinder("wheelRB", { diameter: 0.125, height: 0.05, faceUV: wheelUV })
+    const wheelRB = BABYLON.MeshBuilder.CreateCylinder("wheelRB",
+      {
+        diameter: 0.125,
+        height: 0.05,
+        faceUV: wheelUV
+      });
     wheelRB.material = wheelMat;
     wheelRB.parent = car;
     wheelRB.position.z = -0.1;
@@ -175,7 +221,25 @@ function onSceneReady(scene) {
     wheelLF.animations = [];
     wheelLF.animations.push(animWheel);
 
+    var animCar = new BABYLON.Animation("carAnim", "position.x", 30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
+    var carKeys = [];
+
+    carKeys.push({
+      frame: 0,
+      value: -4
+    });
+
+    carKeys.push({
+      frame: 150,
+      value: 4
+    });
+
+    animCar.setKeys(carKeys);
+
+    car.animations = [];
+    car.animations.push(animCar);
+    scene.beginAnimation(car, 0, 150, true);
 
 
     scene.beginAnimation(wheelRB, 0, 30, true);
@@ -183,16 +247,65 @@ function onSceneReady(scene) {
     scene.beginAnimation(wheelLB, 0, 30, true);
     scene.beginAnimation(wheelLF, 0, 30, true);
 
+
+    // Car Animation
+
+
+
     return car;
   };
 
+  function myDude() {
+
+    BABYLON.SceneLoader.ImportMeshAsync("him", "/objects/", "dude.babylon", scene).then((result) => {
+      var dude = result.meshes[0];
+      dude.scaling = new BABYLON.Vector3(0.008, 0.008, 0.008);
+      scene.beginAnimation(result.skeletons[0], 0, 100, true, 1.0);
+      function walk(turn, dist) {
+        this.turn = turn;
+        this.dist = dist;
+      }
+
+      var track = [];
+      track.push(new walk(86, 7));
+      track.push(new walk(-85, 14.8));
+      track.push(new walk(-93, 16.5));
+      track.push(new walk(48, 25.5));
+      track.push(new walk(-112, 30.5));
+      track.push(new walk(-72, 33.2));
+      track.push(new walk(42, 37.5));
+      track.push(new walk(-98, 45.2));
+      track.push(new walk(0, 47));
+
+      dude.position = new BABYLON.Vector3(-6, 0, 0);
+      dude.rotate(BABYLON.Axis.Y, BABYLON.Tools.ToRadians(-95), BABYLON.Space.LOCAL);
+      var startRotation = dude.rotationQuaternion.clone()
+
+      let distance = 0;
+      let step = 0.015;
+      let p = 0;
+
+      scene.onBeforeRenderObservable.add(() => {
+        dude.movePOV(0, 0, step);
+        distance += step;
+
+        if (distance > track[p].dist) {
+          dude.rotate(BABYLON.Axis.Y, BABYLON.Tools.ToRadians(track[p].turn), BABYLON.Space.LOCAL);
+          p += 1;
+          p %= track.length;
+          if (p === 0) {
+            distance = 0;
+            dude.position = new BABYLON.Vector3(-6, 0, 0);
+            dude.rotationQuaternion = startRotation.clone();
+          }
+        }
+      });
+    });
+
+  }
+
   return scene
 };
-
-
-
-
-
 
 
 
@@ -211,7 +324,6 @@ function App() {
     </div>
   );
 }
-
 
 
 export default App;
