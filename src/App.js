@@ -1,6 +1,6 @@
 
 import * as BABYLON from '@babylonjs/core';
-import { BoxParticleEmitter, SceneLoaderAnimationGroupLoadingMode } from '@babylonjs/core';
+import { BoxParticleEmitter, ParticleSystem, SceneLoaderAnimationGroupLoadingMode } from '@babylonjs/core';
 import { defaultUboDeclaration } from '@babylonjs/core/Shaders/ShadersInclude/defaultUboDeclaration';
 import SceneComponent from 'babylonjs-hook';
 import * as earcut from 'earcut';
@@ -13,7 +13,7 @@ function onSceneReady(scene) {
   var canvas = scene.getEngine().getRenderingCanvas();
 
   var camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2,
-    Math.PI / 2.5, 10, new BABYLON.Vector3(0, 0, 0), scene);
+    Math.PI / 2.5, 50, new BABYLON.Vector3(0, 0, 0), scene);
   camera.upperBetaLimit = Math.PI / 2.1;
   camera.attachControl(canvas, true);
 
@@ -74,6 +74,8 @@ function onSceneReady(scene) {
   car.position.z = 1;
 
   var dude = myDude();
+
+  var fountain = generateFountain();
 
 
   //create functions
@@ -285,6 +287,8 @@ function onSceneReady(scene) {
         this.dist = dist;
       }
 
+      //camera.parent = dude;
+
       var track = [];
       track.push(new walk(86, 7));
       track.push(new walk(-85, 14.8));
@@ -321,7 +325,75 @@ function onSceneReady(scene) {
       });
     });
 
-  }
+  };
+
+  function generateFountain() {
+
+    var fountainOutline = [
+      new BABYLON.Vector3(0, 0, 0),
+      new BABYLON.Vector3(0.5, 0, 0),
+      new BABYLON.Vector3(0.5, 0.2, 0),
+      new BABYLON.Vector3(0.4, 0.2, 0),
+      new BABYLON.Vector3(0.4, 0.05, 0),
+      new BABYLON.Vector3(0.05, 0.1, 0),
+      new BABYLON.Vector3(0.05, 0.8, 0),
+      new BABYLON.Vector3(0.15, 0.9, 0)
+    ];
+
+    //Create lathe fountain
+    var fountain = BABYLON.MeshBuilder.CreateLathe('fountain', { shape: fountainOutline, sideOrientation: BABYLON.Mesh.DOUBLESIDE });
+    fountain.position = new BABYLON.Vector3(-4, 0, -6);
+
+    var particleSystem = new BABYLON.ParticleSystem('particles', 5000, scene);
+
+    particleSystem.particleTexture = new BABYLON.Texture("objects/Flare.png", scene);
+
+    //Particle source
+    particleSystem.emitter = new BABYLON.Vector3(-4, 0.8, -6); // The starting object
+    particleSystem.minEmitBox = new BABYLON.Vector3(-0.01, 0, -0.01); // Starting all from
+    particleSystem.maxEmitBox = new BABYLON.Vector3(0.01, 0, 0.01); // Particle destination
+
+
+    //Colors of all particles
+    particleSystem.color1 = new BABYLON.Color4(0.7, 0.8, 1.0, 1.0);
+    particleSystem.color2 = new BABYLON.Color4(0.2, 0.5, 1.0, 1.0);
+    particleSystem.colorDead = new BABYLON.Color4(0, 0, 0.2, 0.0); // Color before dead
+
+    //Random size of particles in range
+    particleSystem.minSize = 0.1;
+    particleSystem.maxSize = 0.5;
+
+    //Particle lifetime
+    //particleSystem.minLifeTime = 2;
+    particleSystem.maxLifeTime = 5.5;
+
+    //Emision rate
+    particleSystem.emitRate = 1500;
+
+
+    // Blend mode : BLENDMODE_ONEONE, or BLENDMODE_STANDARD
+    particleSystem.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+
+    // Set the gravity of all particles
+    particleSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
+
+    // Direction of each particle after it has been emitted
+    particleSystem.direction1 = new BABYLON.Vector3(-2, 8, 2);
+    particleSystem.direction2 = new BABYLON.Vector3(2, 8, -2);
+
+    // Angular speed, in radians
+    particleSystem.minAngularSpeed = 0;
+    particleSystem.maxAngularSpeed = Math.PI;
+
+    // Speed
+    particleSystem.minEmitPower = 1;
+    particleSystem.maxEmitPower = 3;
+    particleSystem.updateSpeed = 0.025;
+
+    particleSystem.start();
+  };
+
+
 
   return scene
 };
