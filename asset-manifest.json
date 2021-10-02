@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/Intro-BabylonJS/static/css/main.01834f67.chunk.css",
+    "main.js": "/Intro-BabylonJS/static/js/main.96512450.chunk.js",
+    "main.js.map": "/Intro-BabylonJS/static/js/main.96512450.chunk.js.map",
+    "runtime-main.js": "/Intro-BabylonJS/static/js/runtime-main.a407a08a.js",
+    "runtime-main.js.map": "/Intro-BabylonJS/static/js/runtime-main.a407a08a.js.map",
+    "static/js/2.89e522e5.chunk.js": "/Intro-BabylonJS/static/js/2.89e522e5.chunk.js",
+    "static/js/2.89e522e5.chunk.js.map": "/Intro-BabylonJS/static/js/2.89e522e5.chunk.js.map",
+    "static/js/3.a54971be.chunk.js": "/Intro-BabylonJS/static/js/3.a54971be.chunk.js",
+    "static/js/3.a54971be.chunk.js.map": "/Intro-BabylonJS/static/js/3.a54971be.chunk.js.map",
+    "index.html": "/Intro-BabylonJS/index.html",
+    "static/css/main.01834f67.chunk.css.map": "/Intro-BabylonJS/static/css/main.01834f67.chunk.css.map",
+    "static/js/2.89e522e5.chunk.js.LICENSE.txt": "/Intro-BabylonJS/static/js/2.89e522e5.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.a407a08a.js",
+    "static/js/2.89e522e5.chunk.js",
+    "static/css/main.01834f67.chunk.css",
+    "static/js/main.96512450.chunk.js"
+  ]
+}
