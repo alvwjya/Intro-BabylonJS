@@ -38,7 +38,6 @@ function onSceneReady(scene) {
   }
 
 
-
   var skybox = BABYLON.MeshBuilder.CreateBox("skybox", { size: 150 }, scene);
   var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
   skyboxMaterial.backFaceCulling = false;
