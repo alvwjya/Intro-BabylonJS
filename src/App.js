@@ -393,7 +393,7 @@ function onSceneReady(scene) {
   };
 
 
-  //scene.debugLayer.show({});
+  scene.debugLayer.show({});
 
   return scene
 };
